@@ -106,6 +106,7 @@ def main():
     parser.add_argument("--min-amount", type=float, default=0.5, help="当日成交额下限（亿元）")
     parser.add_argument("--max-pivot-age", type=int, default=90, help="中枢起点距今最大K线数")
     parser.add_argument("--workers", type=int, default=16)
+    parser.add_argument("--source", choices=("eastmoney", "sina"), default="eastmoney", help="行情数据源")
     parser.add_argument("--no-cache", action="store_true", help="忽略本地行情缓存")
     parser.add_argument("--plot", action="store_true", help="导出信号结构图")
     parser.add_argument("--result-dir", default=None, help="结构图输出目录，默认 result/<日期>")
@@ -117,7 +118,8 @@ def main():
     universe = main_board_universe()
     names = dict(zip(universe["code"], universe["name"]))
     print(f"股票池 {len(universe)} 只，取数区间 {start} ~ {end}")
-    bars = load_universe(universe["code"], start, end, workers=args.workers, use_cache=not args.no_cache)
+    bars = load_universe(universe["code"], start, end, workers=args.workers,
+                         use_cache=not args.no_cache, source=args.source)
     print(f"有效日线 {len(bars)} 只，开始结构扫描")
 
     result = scan(bars, names, min_amount=args.min_amount, max_pivot_age=args.max_pivot_age)

@@ -28,26 +28,61 @@ def main_board_universe(exclude_st: bool = True) -> pd.DataFrame:
     return lst[mask].reset_index(drop=True)
 
 
-def fetch_daily(code: str, start: str, end: str, adjust: str = "qfq",
-                use_cache: bool = True) -> Optional[pd.DataFrame]:
-    """单只股票日线，返回 [dt, o, c, h, l, v, amt, turn]，带本地 pkl 缓存。"""
-    path = CACHE_DIR / f"{code}_{adjust}_{start}_{end}.pkl"
-    if use_cache and path.exists():
-        try:
-            return pd.read_pickle(path)
-        except Exception:
-            pass
+def _fetch_eastmoney(code: str, start: str, end: str, adjust: str) -> Optional[pd.DataFrame]:
+    df = _ak().stock_zh_a_hist(symbol=code, period="daily", start_date=start,
+                               end_date=end, adjust=adjust)
+    if df is None or df.empty:
+        return None
+    df = df.rename(columns={"日期": "dt", "开盘": "o", "收盘": "c", "最高": "h",
+                            "最低": "l", "成交量": "v", "成交额": "amt", "换手率": "turn"})
+    return df[COLUMNS].copy()
 
-    ak = _ak()
+
+def _fetch_sina(code: str, start: str, end: str, adjust: str) -> Optional[pd.DataFrame]:
+    symbol = ("sh" if code.startswith("6") else "sz") + code
+    df = _ak().stock_zh_a_daily(symbol=symbol, start_date=start, end_date=end, adjust=adjust)
+    if df is None or df.empty:
+        return None
+    return pd.DataFrame({
+        "dt": df["date"], "o": df["open"], "c": df["close"], "h": df["high"],
+        "l": df["low"], "v": df["volume"], "amt": df["amount"],
+        "turn": df["turnover"] * 100,
+    })
+
+
+def fetch_daily(code: str, start: str, end: str, adjust: str = "qfq",
+                use_cache: bool = True, source: str = "eastmoney") -> Optional[pd.DataFrame]:
+    """单只股票日线，返回统一字段并缓存；source 支持 eastmoney / sina。"""
+    source_prefix = "" if source == "eastmoney" else f"{source}_"
+    path = CACHE_DIR / f"{code}_{source_prefix}{adjust}_{start}_{end}.pkl"
+    if use_cache:
+        cache_paths = [path] if path.exists() else []
+        if not cache_paths and CACHE_DIR.exists():
+            for candidate in CACHE_DIR.glob(f"{code}_{source_prefix}{adjust}_*_*.pkl"):
+                try:
+                    cached_start, cached_end = candidate.stem.rsplit("_", 2)[-2:]
+                    if cached_start <= start and cached_end >= end:
+                        cache_paths.append(candidate)
+                except ValueError:
+                    continue
+        for cached_path in sorted(cache_paths):
+            try:
+                cached = pd.read_pickle(cached_path)
+                if cached_path == path:
+                    return cached
+                mask = ((cached["dt"] >= pd.to_datetime(start))
+                        & (cached["dt"] <= pd.to_datetime(end)))
+                return cached.loc[mask].copy()
+            except Exception:
+                pass
+
+    fetcher = _fetch_sina if source == "sina" else _fetch_eastmoney
     for _ in range(3):
         try:
-            df = ak.stock_zh_a_hist(symbol=code, period="daily", start_date=start,
-                                    end_date=end, adjust=adjust)
-            if df is None or len(df) == 0:
+            df = fetcher(code, start, end, adjust)
+            if df is None:
                 return None
-            df = df.rename(columns={"日期": "dt", "开盘": "o", "收盘": "c", "最高": "h",
-                                    "最低": "l", "成交量": "v", "成交额": "amt", "换手率": "turn"})
-            df = df[COLUMNS].copy()
+            df = df.copy()
             df["dt"] = pd.to_datetime(df["dt"])
             if use_cache:
                 CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -62,13 +97,14 @@ def fetch_daily(code: str, start: str, end: str, adjust: str = "qfq",
 
 def load_universe(codes: Iterable[str], start: str, end: str, workers: int = 16,
                   adjust: str = "qfq", use_cache: bool = True,
-                  min_bars: int = 130) -> Dict[str, pd.DataFrame]:
+                  min_bars: int = 130, source: str = "eastmoney") -> Dict[str, pd.DataFrame]:
     """并发拉取股票池日线，过滤数据不足的标的。"""
     codes = list(codes)
 
     def task(code):
         try:
-            return code, fetch_daily(code, start, end, adjust=adjust, use_cache=use_cache)
+            return code, fetch_daily(code, start, end, adjust=adjust,
+                                     use_cache=use_cache, source=source)
         except Exception:
             return code, None
 
