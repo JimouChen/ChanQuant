@@ -1,0 +1,49 @@
+{
+  "name": "chanquant-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ChanQuant A股缠论三买分析客户端",
+  "main": "out/main/index.js",
+  "author": "Neaya",
+  "scripts": {
+    "dev": "node ./node_modules/electron-vite/bin/electron-vite.js dev",
+    "build": "npm run typecheck && node ./node_modules/electron-vite/bin/electron-vite.js build",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
+    "preview": "node ./node_modules/electron-vite/bin/electron-vite.js preview",
+    "dist:mac": "npm run build && node ./node_modules/electron-builder/cli.js --mac"
+  },
+  "dependencies": {
+    "echarts": "^6.0.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "38.2.1",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^3.1.0",
+    "typescript": "^5.7.2",
+    "vite": "^6.1.0"
+  },
+  "build": {
+    "appId": "com.neaya.chanquant",
+    "productName": "ChanQuant",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "out/**/*",
+      "build/icon.png",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.finance",
+      "icon": "build/icon.icns",
+      "target": ["dir"]
+    }
+  }
+}

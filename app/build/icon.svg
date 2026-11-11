@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <title>ChanQuant</title>
+  <desc>浅紫渐变圆角图标，以金色中枢、暖白笔线和朱红三买点构成。</desc>
+  <defs>
+    <linearGradient id="background" x1="128" y1="96" x2="896" y2="928" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#e2d5f4"/>
+      <stop offset="1" stop-color="#ad94d3"/>
+    </linearGradient>
+    <linearGradient id="pivot" x1="256" y1="392" x2="656" y2="640" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#e2c487" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#cda75e" stop-opacity="0.12"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1024" height="1024" rx="224" fill="url(#background)"/>
+  <rect x="18" y="18" width="988" height="988" rx="206" fill="none" stroke="#f6f1e7" stroke-opacity="0.09" stroke-width="3"/>
+
+  <g fill="none" stroke="#dce7df" stroke-linecap="round" stroke-opacity="0.38">
+    <path d="M222 318v282" stroke-width="18"/>
+    <path d="M342 256v250" stroke-width="18"/>
+    <path d="M462 302v226" stroke-width="18"/>
+  </g>
+  <g fill="#dce7df" fill-opacity="0.38">
+    <rect x="190" y="380" width="64" height="142" rx="18"/>
+    <rect x="310" y="306" width="64" height="126" rx="18"/>
+    <rect x="430" y="350" width="64" height="116" rx="18"/>
+  </g>
+
+  <rect x="246" y="404" width="424" height="226" rx="34" fill="url(#pivot)" stroke="#d8b776" stroke-width="10"/>
+  <path d="M266 448h384M266 584h384" fill="none" stroke="#e5c98e" stroke-linecap="round" stroke-width="7" stroke-dasharray="18 20" stroke-opacity="0.85"/>
+
+  <path d="M142 738 286 566 414 666 548 494 704 252 816 348 890 254" fill="none" stroke="#f7f3e9" stroke-linecap="round" stroke-linejoin="round" stroke-width="34"/>
+  <path d="m854 250 38 2-10 37" fill="none" stroke="#f7f3e9" stroke-linecap="round" stroke-linejoin="round" stroke-width="25"/>
+
+  <circle cx="816" cy="348" r="65" fill="#d9554d" stroke="#f7f3e9" stroke-width="16"/>
+  <path d="m816 316 34 58h-68z" fill="#fffaf2"/>
+</svg>
