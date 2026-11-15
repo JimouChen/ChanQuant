@@ -48,13 +48,5 @@ export interface ScanResult {
   funnel: Record<string, number>
   signals: Signal[]
   generatedAt: string
-}
-
-declare global {
-  interface Window {
-    chanQuant: {
-      scan(options: ScanOptions): Promise<ScanResult>
-      cancel(): Promise<boolean>
-    }
-  }
+  durationMs: number
 }

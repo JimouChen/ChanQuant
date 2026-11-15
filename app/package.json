@@ -1,49 +1,28 @@
 {
   "name": "chanquant-desktop",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "ChanQuant A股缠论三买分析客户端",
-  "main": "out/main/index.js",
   "author": "Neaya",
   "scripts": {
-    "dev": "node ./node_modules/electron-vite/bin/electron-vite.js dev",
-    "build": "npm run typecheck && node ./node_modules/electron-vite/bin/electron-vite.js build",
-    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
-    "preview": "node ./node_modules/electron-vite/bin/electron-vite.js preview",
-    "dist:mac": "npm run build && node ./node_modules/electron-builder/cli.js --mac"
+    "dev": "vite",
+    "build": "npm run typecheck && vite build",
+    "typecheck": "vue-tsc --noEmit",
+    "tauri": "tauri",
+    "dist:mac": "tauri build --bundles app"
   },
   "dependencies": {
+    "@tauri-apps/api": "^2.0.0",
     "echarts": "^6.0.0",
-    "lucide-react": "^0.468.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "lucide-vue-next": "^0.468.0",
+    "vue": "^3.5.13"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0",
     "@types/node": "^22.10.2",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "@vitejs/plugin-react": "^4.3.4",
-    "electron": "38.2.1",
-    "electron-builder": "^25.1.8",
-    "electron-vite": "^3.1.0",
+    "@vitejs/plugin-vue": "^5.2.1",
     "typescript": "^5.7.2",
-    "vite": "^6.1.0"
-  },
-  "build": {
-    "appId": "com.neaya.chanquant",
-    "productName": "ChanQuant",
-    "directories": {
-      "output": "release"
-    },
-    "files": [
-      "out/**/*",
-      "build/icon.png",
-      "package.json"
-    ],
-    "mac": {
-      "category": "public.app-category.finance",
-      "icon": "build/icon.icns",
-      "target": ["dir"]
-    }
+    "vite": "^6.1.0",
+    "vue-tsc": "^2.2.0"
   }
 }

@@ -108,7 +108,8 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .error-banner { margin-bottom: 12px; padding: 10px 14px; display: flex; align-items: center; gap: 8px; border: 1px solid #efcbc6; border-radius: 12px; background: #fff3f1; color: #a84b44; font-size: 11px; }
 .error-banner span { flex: 1; white-space: pre-wrap; }
 .error-banner button { border: 0; background: transparent; color: #8e3f39; font-weight: 600; }
-.stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 13px; margin-bottom: 16px; }
+.stats-grid { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 13px; margin-bottom: 16px; }
+.duration-card strong { font-size: 20px; }
 .stat-card { min-height: 91px; padding: 16px; border: 1px solid var(--line); border-radius: 17px; background: rgba(255,255,255,.82); display: flex; align-items: center; gap: 12px; position: relative; }
 .stat-card.featured { background: #edf4df; border-color: #dfe9ce; }
 .stat-icon { width: 35px; height: 35px; flex: 0 0 35px; border-radius: 11px; display: grid; place-items: center; background: #f0f3ee; color: #64756b; }

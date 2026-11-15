@@ -7,5 +7,10 @@ data/
 node_modules/
 app/out/
 app/release/
+app/dist/
+app/src-tauri/target/
+app/src-tauri/gen/
+result/
+DEV_PROGRESS.md
 *.log
 .DS_Store
