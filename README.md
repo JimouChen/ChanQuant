@@ -4,7 +4,7 @@ A 股缠论日线三买扫描客户端，Tauri 2 + Vue 3 + Rust 实现。
 
 行情加载、K 线包含处理、分型、笔、中枢、三买判定、图表数据全部由本地 Rust 引擎完成，运行时无需 Python。桌面端安装包约 5 MB（上一代 Electron 版为 347 MB）。
 
-[![Release](https://img.shields.io/badge/release-v0.3.0-blue)](https://github.com/JimouChen/ChanQuant/releases/tag/v0.3.0) ![platform](https://img.shields.io/badge/platform-macOS%20Apple%20Silicon-lightgrey) ![license](https://img.shields.io/badge/license-MIT-green)
+[![Release](https://img.shields.io/badge/release-v0.3.0-blue)](https://github.com/JimouChen/ChanQuant/releases/tag/v0.3.0) ![Rust](https://img.shields.io/badge/Rust-1.77%2B-000000?logo=rust&logoColor=white) ![Tauri](https://img.shields.io/badge/Tauri-2-24C8D8?logo=tauri&logoColor=white) ![Vue](https://img.shields.io/badge/Vue-3-4FC08D?logo=vuedotjs&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white) ![platform](https://img.shields.io/badge/platform-macOS%20Apple%20Silicon-lightgrey) ![license](https://img.shields.io/badge/license-MIT-green)
 
 ## 功能特性
 
