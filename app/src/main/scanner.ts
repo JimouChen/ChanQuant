@@ -12,8 +12,29 @@ export interface ScanOptions {
 
 let activeProcess: ChildProcessWithoutNullStreams | null = null
 
+function hasEngine(root: string): boolean {
+  return existsSync(path.join(root, 'chanquant', 'api.py'))
+}
+
 function projectRoot(): string {
-  return process.env.CHANQUANT_ROOT ?? path.resolve(__dirname, '../../..')
+  const configuredRoot = process.env.CHANQUANT_ROOT
+  if (configuredRoot) {
+    const root = path.resolve(configuredRoot)
+    if (hasEngine(root)) return root
+    throw new Error(`CHANQUANT_ROOT 未包含 chanquant/api.py：${root}`)
+  }
+
+  for (const start of [__dirname, process.cwd()]) {
+    let current = path.resolve(start)
+    while (true) {
+      if (hasEngine(current)) return current
+      const parent = path.dirname(current)
+      if (parent === current) break
+      current = parent
+    }
+  }
+
+  throw new Error('未找到 Python 缠论引擎，请将客户端放在项目目录内，或通过 CHANQUANT_ROOT 指定项目根目录')
 }
 
 function pythonExecutable(root: string): string {
