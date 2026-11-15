@@ -140,11 +140,20 @@ fn cancel_scan(state: State<'_, ScanState>) -> bool {
         .is_some()
 }
 
+#[tauri::command]
+fn clear_cache() -> Result<model::CacheCleanup, String> {
+    data::clear_cache().map_err(|error| error.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .manage(ScanState::default())
-        .invoke_handler(tauri::generate_handler![scan_market, cancel_scan])
+        .invoke_handler(tauri::generate_handler![
+            scan_market,
+            cancel_scan,
+            clear_cache
+        ])
         .run(tauri::generate_context!())
         .expect("运行 ChanQuant Tauri 应用失败");
 }

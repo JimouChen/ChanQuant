@@ -1,6 +1,6 @@
 [package]
 name = "chanquant"
-version = "0.2.0"
+version = "0.3.0"
 description = "ChanQuant A股缠论三买分析客户端"
 authors = ["Neaya"]
 edition = "2021"

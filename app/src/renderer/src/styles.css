@@ -45,6 +45,11 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .method-card li span { color: #d6edaa; font-size: 9px; font-variant-numeric: tabular-nums; }
 .method-card p { margin: 15px -2px -2px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.07); color: #779487; font-size: 10px; line-height: 1.8; }
 .kernel-status { position: relative; z-index: 1; margin-top: auto; padding: 16px 8px 2px; display: flex; align-items: center; gap: 9px; }
+.cache-tools { position: relative; z-index: 1; margin-top: 14px; padding: 0 8px; }
+.cache-button { width: 100%; height: 34px; border: 1px solid rgba(255,255,255,.12); border-radius: 11px; display: flex; align-items: center; justify-content: center; gap: 7px; background: rgba(255,255,255,.05); color: #a9bcb1; font-size: 11px; font-weight: 600; transition: color .18s, border-color .18s, background .18s; }
+.cache-button:hover:not(:disabled) { color: #e8b0a9; border-color: rgba(232,176,169,.35); background: rgba(232,176,169,.08); }
+.cache-button:disabled { opacity: .45; cursor: not-allowed; }
+.cache-notice { margin: 8px 2px 0; color: #93aa9d; font-size: 10px; line-height: 1.6; text-align: center; }
 .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #8ccca4; box-shadow: 0 0 0 4px rgba(140,204,164,.09); }
 .status-dot.error { background: #e4897e; box-shadow: 0 0 0 4px rgba(228,137,126,.1); }
 .kernel-status strong, .kernel-status span { display: block; }

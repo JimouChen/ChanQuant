@@ -3,12 +3,12 @@ import { computed, onBeforeUnmount, ref } from 'vue'
 import { invoke } from '@tauri-apps/api/core'
 import {
   Activity, CheckCircle2, CircleDot, Clock3, Database, Layers3,
-  LineChart, LoaderCircle, Play, ScanLine, ShieldCheck, Square,
+  LineChart, LoaderCircle, Play, ScanLine, ShieldCheck, Square, Trash2,
 } from 'lucide-vue-next'
 import DatePicker from './components/DatePicker.vue'
 import SignalList from './components/SignalList.vue'
 import StructureChart from './components/StructureChart.vue'
-import type { ScanResult } from './types'
+import type { CacheCleanup, ScanResult } from './types'
 
 function localDate(): string {
   const now = new Date()
@@ -71,13 +71,44 @@ async function cancelScan() {
   loading.value = false
 }
 
+const clearingCache = ref(false)
+const cacheNotice = ref('')
+let noticeTimer: ReturnType<typeof setTimeout> | null = null
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 ** 2) return `${(bytes / 1024).toFixed(1)} KB`
+  if (bytes < 1024 ** 3) return `${(bytes / 1024 ** 2).toFixed(1)} MB`
+  return `${(bytes / 1024 ** 3).toFixed(2)} GB`
+}
+
+async function clearCache() {
+  clearingCache.value = true
+  cacheNotice.value = ''
+  try {
+    const cleanup = await invoke<CacheCleanup>('clear_cache')
+    cacheNotice.value = cleanup.fileCount === 0
+      ? '缓存目录已为空'
+      : `已清理 ${cleanup.fileCount.toLocaleString()} 个文件 · 释放 ${formatBytes(cleanup.bytes)}`
+  } catch (reason) {
+    cacheNotice.value = typeof reason === 'string' ? reason : '清理缓存失败，请稍后重试'
+  } finally {
+    clearingCache.value = false
+    if (noticeTimer) clearTimeout(noticeTimer)
+    noticeTimer = setTimeout(() => { cacheNotice.value = '' }, 5000)
+  }
+}
+
 const selected = computed(() => result.value?.signals.find((item) => item.code === selectedCode.value) ?? null)
 const filteredSignals = computed(() => {
   const normalized = keyword.value.trim().toLowerCase()
   return (result.value?.signals ?? []).filter((item) => item.code.includes(normalized) || item.name.toLowerCase().includes(normalized))
 })
 const duration = computed(() => loading.value ? elapsedMs.value : result.value?.durationMs)
-onBeforeUnmount(() => { if (timer) clearInterval(timer) })
+onBeforeUnmount(() => {
+  if (timer) clearInterval(timer)
+  if (noticeTimer) clearTimeout(noticeTimer)
+})
 </script>
 
 <template>
@@ -95,6 +126,13 @@ onBeforeUnmount(() => { if (timer) clearInterval(timer) })
         <div class="method-title"><Layers3 :size="16" /><span>判定规则</span></div>
         <ol><li><span>01</span>向上离开中枢</li><li><span>02</span>回抽不进中枢</li><li><span>03</span>底分型当日确认</li></ol>
         <p>只输出已确认结构<br />不使用未来函数</p>
+      </div>
+      <div class="cache-tools">
+        <button class="cache-button" type="button" :disabled="clearingCache || loading" @click="clearCache">
+          <Trash2 :size="14" />
+          <span>{{ clearingCache ? '正在清理…' : '清理行情缓存' }}</span>
+        </button>
+        <p v-if="cacheNotice" class="cache-notice">{{ cacheNotice }}</p>
       </div>
       <div class="kernel-status">
         <span class="status-dot" :class="{ error }" />

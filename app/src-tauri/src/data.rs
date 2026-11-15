@@ -51,25 +51,34 @@ pub fn main_board_universe(client: &Client) -> Result<Vec<StockInfo>> {
     let mut page = 1;
     let mut all_stocks = Vec::new();
     loop {
-        let response: Response = client
-            .get("https://push2.eastmoney.com/api/qt/clist/get")
-            .query(&[
-                ("pn", page.to_string()),
-                ("pz", "100".to_string()),
-                ("po", "1".to_string()),
-                ("np", "1".to_string()),
-                ("fltt", "2".to_string()),
-                ("invt", "2".to_string()),
-                ("fid", "f12".to_string()),
-                ("fs", "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23".to_string()),
-                ("fields", "f12,f14".to_string()),
-            ])
-            .send()
-            .context("获取沪深股票池失败")?
-            .error_for_status()
-            .context("股票池接口返回异常")?
-            .json()
-            .context("解析股票池失败")?;
+        let mut attempt = 0;
+        let response: Response = loop {
+            let result = client
+                .get("https://push2.eastmoney.com/api/qt/clist/get")
+                .query(&[
+                    ("pn", page.to_string()),
+                    ("pz", "100".to_string()),
+                    ("po", "1".to_string()),
+                    ("np", "1".to_string()),
+                    ("fltt", "2".to_string()),
+                    ("invt", "2".to_string()),
+                    ("fid", "f12".to_string()),
+                    ("fs", "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23".to_string()),
+                    ("fields", "f12,f14".to_string()),
+                ])
+                .send()
+                .and_then(|response| response.error_for_status())
+                .map_err(anyhow::Error::from)
+                .and_then(|response| response.json().map_err(anyhow::Error::from));
+            match result {
+                Ok(response) => break response,
+                Err(_) if attempt < 2 => {
+                    attempt += 1;
+                    thread::sleep(Duration::from_millis(800));
+                }
+                Err(error) => return Err(error).context("获取沪深股票池失败"),
+            }
+        };
         let data = response.data.ok_or_else(|| anyhow!("股票池接口无数据"))?;
         let total = data.total;
         let count = data.diff.len();
@@ -115,6 +124,32 @@ pub fn cache_dir() -> PathBuf {
                 .unwrap_or_else(|| PathBuf::from("."))
                 .join(".cache/chanquant/daily")
         })
+}
+
+/// 清空行情缓存目录，返回删除的文件数与释放的字节数。
+pub fn clear_cache() -> Result<crate::model::CacheCleanup> {
+    let dir = cache_dir();
+    let mut file_count = 0usize;
+    let mut bytes = 0u64;
+    if !dir.exists() {
+        return Ok(crate::model::CacheCleanup { file_count, bytes });
+    }
+    for entry in
+        fs::read_dir(&dir).with_context(|| format!("读取缓存目录失败：{}", dir.display()))?
+    {
+        let entry = entry.with_context(|| format!("遍历缓存目录失败：{}", dir.display()))?;
+        let metadata = entry
+            .metadata()
+            .with_context(|| format!("读取缓存文件信息失败：{}", entry.path().display()))?;
+        if !metadata.is_file() {
+            continue;
+        }
+        bytes += metadata.len();
+        fs::remove_file(entry.path())
+            .with_context(|| format!("删除缓存文件失败：{}", entry.path().display()))?;
+        file_count += 1;
+    }
+    Ok(crate::model::CacheCleanup { file_count, bytes })
 }
 
 pub fn load_universe(
@@ -445,4 +480,44 @@ fn fetch_sina(client: &Client, code: &str, start: NaiveDate, end: NaiveDate) -> 
 fn py_round(value: f64, digits: i32) -> f64 {
     let factor = 10_f64.powi(digits);
     (value * factor).round_ties_even() / factor
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::Mutex;
+
+    /// clear_cache 涉及进程级环境变量，串行化避免与其他用例竞争。
+    static ENV_LOCK: Mutex<()> = Mutex::new(());
+
+    #[test]
+    fn clear_cache_removes_files_and_reports_usage() {
+        let _guard = ENV_LOCK.lock().unwrap();
+        let previous = env::var_os("CHANQUANT_CACHE");
+        let staging = env::temp_dir().join(format!("chanquant-clear-test-{}", std::process::id()));
+        fs::create_dir_all(&staging).unwrap();
+        let first = staging.join("000001_sina_qfq_20240101_20261111.json");
+        let second = staging.join("600863.pkl");
+        fs::write(&first, "x".repeat(100)).unwrap();
+        fs::write(&second, "y".repeat(50)).unwrap();
+        env::set_var("CHANQUANT_CACHE", &staging);
+
+        let cleanup = clear_cache().unwrap();
+
+        assert_eq!(cleanup.file_count, 2);
+        assert_eq!(cleanup.bytes, 150);
+        assert!(!first.exists());
+        assert!(!second.exists());
+        assert!(staging.exists());
+
+        let again = clear_cache().unwrap();
+        assert_eq!(again.file_count, 0);
+        assert_eq!(again.bytes, 0);
+
+        fs::remove_dir_all(&staging).unwrap();
+        match previous {
+            Some(value) => env::set_var("CHANQUANT_CACHE", value),
+            None => env::remove_var("CHANQUANT_CACHE"),
+        }
+    }
 }

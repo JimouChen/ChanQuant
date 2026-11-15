@@ -148,3 +148,10 @@ pub struct ScanResult {
     pub generated_at: String,
     pub duration_ms: u64,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct CacheCleanup {
+    pub file_count: usize,
+    pub bytes: u64,
+}

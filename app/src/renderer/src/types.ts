@@ -50,3 +50,8 @@ export interface ScanResult {
   generatedAt: string
   durationMs: number
 }
+
+export interface CacheCleanup {
+  fileCount: number
+  bytes: number
+}
