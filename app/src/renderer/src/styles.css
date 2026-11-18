@@ -197,6 +197,25 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .statusbar > span:nth-child(2) { flex: 1; }
 .risk-note { color: #ae8c87; }
 
+.stats-grid.six { grid-template-columns: 1.15fr repeat(5, minmax(120px, 1fr)); }
+.bt-workspace { flex: 1; min-height: 0; display: grid; grid-template-rows: minmax(300px, 46%) minmax(0, 1fr); gap: 16px; }
+.bt-chart-panel { padding: 19px 20px 0; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+.equity-chart { flex: 1; min-height: 220px; width: 100%; }
+.legend-equity { width: 14px; height: 2px; background: #1e745b; }
+.legend-drawdown { width: 14px; height: 2px; background: #d9554d; }
+.bt-trades-panel { display: flex; flex-direction: column; padding: 16px 12px 10px; overflow: hidden; }
+.bt-trades-heading { padding: 0 7px 10px; }
+.bt-trades-heading span { color: #98a29b; font-size: 10px; }
+.bt-table-wrap { flex: 1; min-height: 0; overflow: auto; padding: 0 4px; }
+.bt-table { width: 100%; border-collapse: collapse; font-size: 11px; white-space: nowrap; }
+.bt-table th { position: sticky; top: 0; z-index: 1; background: var(--panel); text-align: left; padding: 7px 10px; color: #98a29b; font-size: 9px; font-weight: 600; border-bottom: 1px solid var(--line); }
+.bt-table td { padding: 7px 10px; border-bottom: 1px solid #f0f2ee; color: #4a564f; }
+.bt-table tbody tr:hover { background: #f7f9f5; }
+.bt-table .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; }
+.bt-table .profit { color: #c04a42; }
+.bt-table .loss { color: #1c9873; }
+.empty-state.compact { min-height: 120px; }
+
 @media (max-width: 1260px) {
   .sidebar { width: 194px; flex-basis: 194px; }
   .page-title h1 span { display: none; }
@@ -204,6 +223,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
   .topbar, .content { padding-left: 20px; padding-right: 20px; }
   .source-field { display: none; }
   .stat-note { display: none; }
+  .stats-grid.six { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }

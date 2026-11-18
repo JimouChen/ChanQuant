@@ -155,3 +155,98 @@ pub struct CacheCleanup {
     pub file_count: usize,
     pub bytes: u64,
 }
+
+fn default_capital() -> f64 {
+    1_000_000.0
+}
+fn default_max_positions() -> usize {
+    5
+}
+fn default_commission() -> f64 {
+    0.00025
+}
+fn default_stamp_duty() -> f64 {
+    0.0005
+}
+fn default_slippage() -> f64 {
+    0.001
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BacktestOptions {
+    pub start: String,
+    pub end: String,
+    #[serde(default = "default_capital")]
+    pub initial_capital: f64,
+    #[serde(default = "default_max_positions")]
+    pub max_positions: usize,
+    #[serde(default = "default_min_amount")]
+    pub min_amount: f64,
+    #[serde(default = "default_max_pivot_age")]
+    pub max_pivot_age: usize,
+    #[serde(default = "default_commission")]
+    pub commission_rate: f64,
+    #[serde(default = "default_stamp_duty")]
+    pub stamp_duty_rate: f64,
+    #[serde(default = "default_slippage")]
+    pub slippage: f64,
+    #[serde(default = "default_workers")]
+    pub workers: usize,
+    #[serde(default = "default_source")]
+    pub source: DataSource,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct EquityPoint {
+    pub date: String,
+    pub equity: f64,
+    pub drawdown: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct Trade {
+    pub code: String,
+    pub name: String,
+    pub entry_date: String,
+    pub entry_price: f64,
+    pub exit_date: String,
+    pub exit_price: f64,
+    pub shares: u64,
+    pub zg: f64,
+    pub pnl: f64,
+    pub pnl_pct: f64,
+    pub hold_days: usize,
+    pub exit_reason: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct BacktestStats {
+    pub total_return_pct: f64,
+    pub annualized_pct: f64,
+    pub max_drawdown_pct: f64,
+    pub win_rate_pct: f64,
+    pub profit_factor: Option<f64>,
+    pub trade_count: usize,
+    pub avg_hold_days: f64,
+    pub final_equity: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct BacktestResult {
+    pub start: String,
+    pub end: String,
+    pub source: DataSource,
+    pub universe_size: usize,
+    pub loaded_size: usize,
+    pub signal_count: usize,
+    pub stats: BacktestStats,
+    pub equity_curve: Vec<EquityPoint>,
+    pub trades: Vec<Trade>,
+    pub generated_at: String,
+    pub duration_ms: u64,
+}

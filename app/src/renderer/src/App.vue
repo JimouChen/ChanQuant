@@ -2,9 +2,10 @@
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { invoke } from '@tauri-apps/api/core'
 import {
-  Activity, CheckCircle2, CircleDot, Clock3, Database, Layers3,
+  Activity, CheckCircle2, CircleDot, Clock3, Database, History, Layers3,
   LineChart, LoaderCircle, Play, ScanLine, ShieldCheck, Square, Trash2,
 } from 'lucide-vue-next'
+import BacktestView from './components/BacktestView.vue'
 import DatePicker from './components/DatePicker.vue'
 import SignalList from './components/SignalList.vue'
 import StructureChart from './components/StructureChart.vue'
@@ -23,6 +24,7 @@ function formatDuration(milliseconds: number | undefined): string {
   return `${minutes}分${seconds}秒`
 }
 
+const view = ref<'scan' | 'backtest'>('scan')
 const date = ref(localDate())
 const minAmount = ref(0.5)
 const source = ref<'sina' | 'eastmoney'>('sina')
@@ -120,7 +122,8 @@ onBeforeUnmount(() => {
       </div>
       <nav class="navigation" aria-label="主导航">
         <span class="nav-caption">分析工作台</span>
-        <button class="nav-item active" type="button"><ScanLine :size="18" /><span>三买选股</span><i /></button>
+        <button class="nav-item" :class="{ active: view === 'scan' }" type="button" @click="view = 'scan'"><ScanLine :size="18" /><span>三买选股</span><i v-if="view === 'scan'" /></button>
+        <button class="nav-item" :class="{ active: view === 'backtest' }" type="button" @click="view = 'backtest'"><History :size="18" /><span>历史回测</span><i v-if="view === 'backtest'" /></button>
       </nav>
       <div class="method-card">
         <div class="method-title"><Layers3 :size="16" /><span>判定规则</span></div>
@@ -141,6 +144,7 @@ onBeforeUnmount(() => {
     </aside>
 
     <main class="main-area">
+      <template v-if="view === 'scan'">
       <header class="topbar">
         <div class="page-title"><span class="eyebrow">STRUCTURE OVER NOISE</span><h1>三买信号 <span>让走势自己说话</span></h1></div>
         <form class="scan-controls" @submit.prevent="runScan">
@@ -193,6 +197,8 @@ onBeforeUnmount(() => {
         <span>{{ result ? `数据截止 ${result.tradeDate} · ${result.source === 'sina' ? '新浪行情' : '东方财富'} · 本次扫描 ${formatDuration(result.durationMs)}${result.durationMs < 60000 ? (result.durationMs < 1000 ? ' 毫秒' : ' 秒') : ''}` : 'Rust 本地数据管线' }}</span>
         <span class="risk-note">跌破回抽低点即结构失效</span>
       </footer>
+      </template>
+      <BacktestView v-else />
     </main>
   </div>
 </template>
